@@ -283,5 +283,62 @@ namespace MiniGit {
         return files;
     }
 
+    // --- CHECKOUT FUNCTION ---
+    void checkout(const std::string& commitHash) {
+        // 0. Check if the target commit object actually exists
+        fs::path commitPath = OBJECTS_DIR / commitHash;
+        if (commitHash.empty() || !fs::exists(commitPath)) {
+            throw std::runtime_error("Fatal: Not a valid commit hash: " + commitHash);
+        }
+
+        // 1. Warn user if they have staged changes (which will be lost)
+        std::map<std::string, std::string> stagedFiles = getStagingArea();
+        if (!stagedFiles.empty()) {
+            std::cout << "Warning: Discarding " << stagedFiles.size() << " staged change(s)." << std::endl;
+        }
+
+        // 2. Get the file maps (trees) for both commits
+        std::map<std::string, std::string> targetFiles = getCommitFiles(commitHash);
+        std::map<std::string, std::string> headFiles = getCommitFiles(getHEAD());
+
+        // 3. Delete files that are in HEAD but not in the target commit
+        for (const auto& pair : headFiles) {
+            const std::string& filename = pair.first;
+            if (targetFiles.find(filename) == targetFiles.end()) {
+                // Not in the target, so delete it
+                if (fs::exists(filename)) {
+                    fs::remove(filename);
+                    std::cout << "Deleted " << filename << std::endl;
+                }
+            }
+        }
+
+        // 4. Create/overwrite all files from the target commit
+        for (const auto& pair : targetFiles) {
+            const std::string& filename = pair.first;
+            const std::string& contentHash = pair.second;
+            
+            fs::path targetPath = filename;
+
+            // Important: Ensure the directory exists before writing!
+            if (targetPath.has_parent_path()) {
+                fs::create_directories(targetPath.parent_path());
+            }
+
+            // Read the blob content from objects
+            std::string content = readFileContent(OBJECTS_DIR / contentHash);
+
+            // Write the content to the working directory
+            writeFileContent(targetPath, content);
+            std::cout << "Restored " << filename << std::endl;
+        }
+
+        // 5. Clear the staging area and update HEAD to point to the new commit
+        setStagingArea({});
+        setHEAD(commitHash);
+
+        std::cout << "\nHEAD is now at " << commitHash << std::endl;
+    }
+
 } // namespace MiniGit
 

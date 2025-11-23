@@ -71,7 +71,22 @@ int main(int argc, char* argv[]) {
                 return 1;
             }
             MiniGit::log();
-        } else {
+        } // --- PASTE THIS BLOCK ---
+        else if (command == "checkout") {
+            // Check if we are in a repo
+            if (!MiniGit::repoExists()) {
+                std::cerr << "Fatal: Not a MiniGit repository." << std::endl;
+                return 1;
+            }
+            if (argc != 3) {
+                std::cerr << "Usage: minigit checkout <commit-hash>" << std::endl;
+                return 1;
+            }
+            std::string commitHash = argv[2];
+            MiniGit::checkout(commitHash);
+        }
+        // ------------------------ 
+        else {
             std::cerr << "Unknown command: " << command << std::endl;
             printUsage();
             return 1;

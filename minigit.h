@@ -126,6 +126,8 @@ namespace MiniGit {
      */
     std::map<std::string, std::string> getCommitFiles(const std::string& commitHash);
 
+    void checkout(const std::string& commitHash);
+
 } // namespace MiniGit
 
 #endif // MINIGIT_H
