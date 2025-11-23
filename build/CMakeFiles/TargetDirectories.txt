@@ -1,0 +1,3 @@
+C:/Users/aksha/OneDrive/Documents/VS Code/miniGit/build/CMakeFiles/minigit.dir
+C:/Users/aksha/OneDrive/Documents/VS Code/miniGit/build/CMakeFiles/edit_cache.dir
+C:/Users/aksha/OneDrive/Documents/VS Code/miniGit/build/CMakeFiles/rebuild_cache.dir
